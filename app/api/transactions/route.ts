@@ -310,46 +310,5 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-// ============================================================
-// COMMISSION CALCULATOR HELPER
-// ============================================================
-export async function POST_CALCULATE_COMMISSION(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { purchase_price, commission_rate, commission_split } = body;
-
-    if (!purchase_price || !commission_rate) {
-      return NextResponse.json(
-        { success: false, error: 'Purchase price and commission rate are required' },
-        { status: 400 }
-      );
-    }
-
-    const grossCommission = purchase_price * (commission_rate / 100);
-    const agentCommission = commission_split 
-      ? grossCommission * (commission_split / 100)
-      : grossCommission;
-
-    return NextResponse.json({
-      success: true,
-      calculation: {
-        purchase_price,
-        commission_rate,
-        commission_split: commission_split || 100,
-        gross_commission: grossCommission,
-        agent_commission: agentCommission,
-        formatted: {
-          purchase_price: `$${purchase_price.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-          gross_commission: `$${grossCommission.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-          agent_commission: `$${agentCommission.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
-        }
-      }
-    });
-  } catch (error: any) {
-    console.error('Error calculating commission:', error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
-  }
-}
+// Commission calculation is done automatically in POST and PATCH
+// Removed POST_CALCULATE_COMMISSION to comply with Next.js route requirements
