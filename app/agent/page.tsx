@@ -1,341 +1,473 @@
 'use client';
 
-import { useState } from 'react';
-import { 
-  Home, 
-  Users, 
-  TrendingUp, 
-  Calendar,
-  Mail,
-  Phone,
-  MapPin,
-  DollarSign,
-  FileText,
-  Settings,
-  Bell,
-  Search
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import { Home, Building2, Factory, Plus, Search, Filter, DollarSign, Bed, Bath, Square, MapPin, Edit2, Trash2, Eye, LogOut } from 'lucide-react';
 
-type Tab = 'overview' | 'properties' | 'leads' | 'settings';
+interface Property {
+  id: string;
+  address_street: string;
+  address_city: string;
+  address_zip: string;
+  property_type: string;
+  bedrooms: number;
+  bathrooms: number;
+  square_feet: number;
+  list_price: number | null;
+  rental_price_monthly: number | null;
+  category: string;
+  status: string;
+  description: string;
+  photos: string[];
+}
+
+type PropertyCategory = 'residential_sale' | 'residential_rental' | 'commercial_sale' | 'commercial_rental' | 'industrial_sale' | 'industrial_rental';
 
 export default function AgentDashboard() {
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
-  const [selectedMarket, setSelectedMarket] = useState('Fort Myers');
+  const [activeCategory, setActiveCategory] = useState<PropertyCategory>('residential_sale');
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [showAddProperty, setShowAddProperty] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const router = useRouter();
+  const supabase = createClient();
 
-  const floridaMarkets = [
-    'Miami', 'Tampa', 'Orlando', 'Jacksonville', 
-    'Fort Myers', 'Tallahassee', 'Naples', 'Sarasota'
+  useEffect(() => {
+    loadUserAndProperties();
+  }, [activeCategory]);
+
+  const loadUserAndProperties = async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      setUserProfile(profile);
+
+      const { data: props } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('category', activeCategory)
+        .order('created_at', { ascending: false });
+
+      setProperties(props || []);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
+
+  const deleteProperty = async (id: string) => {
+    if (!confirm('Delete this property?')) return;
+    await supabase.from('properties').delete().eq('id', id);
+    loadUserAndProperties();
+  };
+
+  const categories = [
+    { id: 'residential_sale' as const, label: 'Buy Home', icon: Home, color: 'blue' },
+    { id: 'residential_rental' as const, label: 'Rent Home', icon: Home, color: 'green' },
+    { id: 'commercial_sale' as const, label: 'Buy Commercial', icon: Building2, color: 'purple' },
+    { id: 'commercial_rental' as const, label: 'Rent Commercial', icon: Building2, color: 'cyan' },
+    { id: 'industrial_sale' as const, label: 'Buy Industrial', icon: Factory, color: 'orange' },
+    { id: 'industrial_rental' as const, label: 'Rent Industrial', icon: Factory, color: 'red' },
   ];
 
+  const filteredProperties = properties.filter(p =>
+    p.address_street.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.address_city.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="bg-white border-b shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Agent Dashboard</h1>
-              <p className="text-sm text-gray-600 mt-1">Welcome back, Tony Harvey</p>
+              <h1 className="text-2xl font-bold text-gray-900">Tony & Laura Harvey</h1>
+              <p className="text-sm text-gray-600">Premiere Plus Realty</p>
             </div>
-            <div className="flex items-center gap-4">
-              <select
-                value={selectedMarket}
-                onChange={(e) => setSelectedMarket(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {floridaMarkets.map((market) => (
-                  <option key={market} value={market}>{market}</option>
-                ))}
-              </select>
-              <button className="p-2 hover:bg-gray-100 rounded-lg relative">
-                <Bell className="w-5 h-5 text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-            </div>
+            <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg">
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
           </div>
 
-          {/* Tabs */}
-          <div className="flex gap-4 mt-6">
-            {[
-              { id: 'overview', label: 'Overview', icon: <Home className="w-4 h-4" /> },
-              { id: 'properties', label: 'Properties', icon: <MapPin className="w-4 h-4" /> },
-              { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" /> },
-              { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> }
-            ].map((tab) => (
+          {/* Category Tabs */}
+          <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+            {categories.map((cat) => (
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as Tab)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${
-                  activeTab === tab.id
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition ${
+                  activeCategory === cat.id
+                    ? `bg-${cat.color}-600 text-white`
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border'
                 }`}
+                style={activeCategory === cat.id ? {
+                  backgroundColor: cat.color === 'blue' ? '#2563eb' :
+                    cat.color === 'green' ? '#16a34a' :
+                    cat.color === 'purple' ? '#9333ea' :
+                    cat.color === 'cyan' ? '#06b6d4' :
+                    cat.color === 'orange' ? '#ea580c' : '#dc2626'
+                } : {}}
               >
-                {tab.icon}
-                {tab.label}
+                <cat.icon className="w-4 h-4" />
+                {cat.label}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'overview' && <OverviewTab market={selectedMarket} />}
-        {activeTab === 'properties' && <PropertiesTab market={selectedMarket} />}
-        {activeTab === 'leads' && <LeadsTab />}
-        {activeTab === 'settings' && <SettingsTab />}
-      </div>
-    </div>
-  );
-}
-
-function OverviewTab({ market }: { market: string }) {
-  return (
-    <div className="space-y-6">
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard title="Active Listings" value="12" change="+2" icon={<Home />} color="blue" />
-        <StatCard title="New Leads" value="8" change="+3" icon={<Users />} color="green" />
-        <StatCard title="Scheduled Tours" value="5" change="+1" icon={<Calendar />} color="purple" />
-        <StatCard title="Pending Sales" value="$2.4M" change="+$500K" icon={<DollarSign />} color="orange" />
-      </div>
-
-      {/* Recent Activity */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity - {market}</h2>
-        <div className="space-y-4">
-          {[
-            { time: '2 hours ago', action: 'New lead inquired about 3BR condo in Miami Beach', type: 'lead' },
-            { time: '5 hours ago', action: 'Property tour scheduled for 123 Ocean Dr', type: 'tour' },
-            { time: '1 day ago', action: 'Offer accepted on 456 Bay St - $850,000', type: 'sale' },
-            { time: '2 days ago', action: 'New listing added: 789 Palm Ave', type: 'listing' }
-          ].map((activity, index) => (
-            <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-              <div className={`p-2 rounded-lg ${
-                activity.type === 'lead' ? 'bg-green-100 text-green-600' :
-                activity.type === 'tour' ? 'bg-blue-100 text-blue-600' :
-                activity.type === 'sale' ? 'bg-purple-100 text-purple-600' :
-                'bg-orange-100 text-orange-600'
-              }`}>
-                {activity.type === 'lead' ? <Users className="w-5 h-5" /> :
-                 activity.type === 'tour' ? <Calendar className="w-5 h-5" /> :
-                 activity.type === 'sale' ? <TrendingUp className="w-5 h-5" /> :
-                 <Home className="w-5 h-5" />}
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-gray-900">{activity.action}</p>
-                <p className="text-sm text-gray-600">{activity.time}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PropertiesTab({ market }: { market: string }) {
-  return (
-    <div className="space-y-6">
-      {/* Search & Filter */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex gap-4">
+        {/* Search & Add */}
+        <div className="flex gap-4 mb-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search properties..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <select className="px-4 py-2 border border-gray-300 rounded-lg">
-            <option>All Types</option>
-            <option>Single Family</option>
-            <option>Condo</option>
-            <option>Townhouse</option>
-          </select>
-          <select className="px-4 py-2 border border-gray-300 rounded-lg">
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Pending</option>
-            <option>Sold</option>
-          </select>
+          <button
+            onClick={() => setShowAddProperty(true)}
+            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <Plus className="w-5 h-5" />
+            Add Property
+          </button>
         </div>
+
+        {/* Properties Grid */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProperties.map((property) => (
+              <PropertyCard
+                key={property.id}
+                property={property}
+                onDelete={() => deleteProperty(property.id)}
+                onEdit={() => {}}
+              />
+            ))}
+          </div>
+        )}
+
+        {filteredProperties.length === 0 && !loading && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-2">
+              {activeCategory.includes('residential') && <Home className="w-16 h-16 mx-auto" />}
+              {activeCategory.includes('commercial') && <Building2 className="w-16 h-16 mx-auto" />}
+              {activeCategory.includes('industrial') && <Factory className="w-16 h-16 mx-auto" />}
+            </div>
+            <p className="text-gray-600">No properties in this category yet</p>
+            <button
+              onClick={() => setShowAddProperty(true)}
+              className="mt-4 text-blue-600 hover:underline"
+            >
+              Add your first property
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Properties Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
-          { address: '123 Ocean Dr', city: 'Miami Beach', price: 1250000, beds: 3, baths: 2, sqft: 2100, status: 'Active' },
-          { address: '456 Bay St', city: 'Tampa', price: 850000, beds: 4, baths: 3, sqft: 2800, status: 'Pending' },
-          { address: '789 Palm Ave', city: market, price: 625000, beds: 3, baths: 2.5, sqft: 2200, status: 'Active' },
-          { address: '321 Sunset Blvd', city: 'Naples', price: 1850000, beds: 5, baths: 4, sqft: 3500, status: 'Active' },
-          { address: '654 Marina Way', city: 'Sarasota', price: 975000, beds: 4, baths: 3, sqft: 2600, status: 'Pending' },
-          { address: '987 Gulf Shore', city: 'Fort Myers', price: 725000, beds: 3, baths: 2, sqft: 1900, status: 'Active' }
-        ].map((property, index) => (
-          <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
-            <div className="h-48 bg-gradient-to-br from-blue-400 to-cyan-400"></div>
-            <div className="p-4">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <p className="font-bold text-gray-900">{property.address}</p>
-                  <p className="text-sm text-gray-600">{property.city}, FL</p>
-                </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                  property.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                }`}>
-                  {property.status}
-                </span>
+      {/* Add Property Modal */}
+      {showAddProperty && (
+        <AddPropertyModal
+          category={activeCategory}
+          onClose={() => setShowAddProperty(false)}
+          onSuccess={loadUserAndProperties}
+        />
+      )}
+    </div>
+  );
+}
+
+function PropertyCard({ property, onDelete, onEdit }: { property: Property; onDelete: () => void; onEdit: () => void }) {
+  const isRental = property.category.includes('rental');
+  const price = isRental ? property.rental_price_monthly : property.list_price;
+
+  return (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+      {/* Image placeholder */}
+      <div className="h-48 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+        {property.category.includes('residential') && <Home className="w-12 h-12 text-blue-600" />}
+        {property.category.includes('commercial') && <Building2 className="w-12 h-12 text-purple-600" />}
+        {property.category.includes('industrial') && <Factory className="w-12 h-12 text-orange-600" />}
+      </div>
+
+      <div className="p-4">
+        {/* Price */}
+        <div className="text-2xl font-bold text-gray-900 mb-2">
+          ${price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          {isRental && <span className="text-sm font-normal text-gray-600">/month</span>}
+        </div>
+
+        {/* Address */}
+        <div className="flex items-start gap-2 text-gray-700 mb-3">
+          <MapPin className="w-4 h-4 flex-shrink-0 mt-1" />
+          <div>
+            <div className="font-medium">{property.address_street}</div>
+            <div className="text-sm">{property.address_city}, FL {property.address_zip}</div>
+          </div>
+        </div>
+
+        {/* Details */}
+        {property.bedrooms > 0 && (
+          <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+            <div className="flex items-center gap-1">
+              <Bed className="w-4 h-4" />
+              {property.bedrooms} bed
+            </div>
+            <div className="flex items-center gap-1">
+              <Bath className="w-4 h-4" />
+              {property.bathrooms} bath
+            </div>
+            <div className="flex items-center gap-1">
+              <Square className="w-4 h-4" />
+              {property.square_feet.toLocaleString()} sqft
+            </div>
+          </div>
+        )}
+
+        {property.square_feet > 0 && property.bedrooms === 0 && (
+          <div className="flex items-center gap-1 text-sm text-gray-600 mb-3">
+            <Square className="w-4 h-4" />
+            {property.square_feet.toLocaleString()} sqft
+          </div>
+        )}
+
+        {/* Description */}
+        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{property.description}</p>
+
+        {/* Status */}
+        <div className="flex items-center justify-between">
+          <span className={`px-3 py-1 text-xs rounded-full ${
+            property.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          }`}>
+            {property.status}
+          </span>
+
+          {/* Actions */}
+          <div className="flex gap-2">
+            <button onClick={onEdit} className="p-2 text-blue-600 hover:bg-blue-50 rounded">
+              <Edit2 className="w-4 h-4" />
+            </button>
+            <button onClick={onDelete} className="p-2 text-red-600 hover:bg-red-50 rounded">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AddPropertyModal({ category, onClose, onSuccess }: { category: PropertyCategory; onClose: () => void; onSuccess: () => void }) {
+  const [formData, setFormData] = useState({
+    address_street: '',
+    address_city: 'Naples',
+    address_zip: '',
+    property_type: 'single_family',
+    bedrooms: 0,
+    bathrooms: 0,
+    square_feet: 0,
+    price: '',
+    description: '',
+    status: 'active'
+  });
+  const [loading, setLoading] = useState(false);
+  const supabase = createClient();
+
+  const isRental = category.includes('rental');
+  const isResidential = category.includes('residential');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user?.id)
+        .single();
+
+      const propertyData: any = {
+        organization_id: profile?.organization_id || '00000000-0000-0000-0000-000000000001',
+        agent_id: user?.id,
+        address_street: formData.address_street,
+        address_city: formData.address_city,
+        address_zip: formData.address_zip,
+        address_state: 'FL',
+        property_type: formData.property_type,
+        square_feet: parseInt(formData.square_feet.toString()),
+        category,
+        status: formData.status,
+        description: formData.description
+      };
+
+      if (isResidential) {
+        propertyData.bedrooms = parseInt(formData.bedrooms.toString());
+        propertyData.bathrooms = parseFloat(formData.bathrooms.toString());
+      }
+
+      if (isRental) {
+        propertyData.rental_price_monthly = parseFloat(formData.price);
+      } else {
+        propertyData.list_price = parseFloat(formData.price);
+      }
+
+      const { error } = await supabase.from('properties').insert(propertyData);
+      if (error) throw error;
+
+      alert('Property added!');
+      onSuccess();
+      onClose();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to add property');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-4">Add Property - {category.replace(/_/g, ' ').toUpperCase()}</h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="Street Address"
+                value={formData.address_street}
+                onChange={(e) => setFormData({...formData, address_street: e.target.value})}
+                required
+                className="col-span-2 px-4 py-2 border rounded-lg"
+              />
+              <input
+                type="text"
+                placeholder="City"
+                value={formData.address_city}
+                onChange={(e) => setFormData({...formData, address_city: e.target.value})}
+                required
+                className="px-4 py-2 border rounded-lg"
+              />
+              <input
+                type="text"
+                placeholder="ZIP Code"
+                value={formData.address_zip}
+                onChange={(e) => setFormData({...formData, address_zip: e.target.value})}
+                required
+                className="px-4 py-2 border rounded-lg"
+              />
+            </div>
+
+            {isResidential && (
+              <div className="grid grid-cols-3 gap-4">
+                <input
+                  type="number"
+                  placeholder="Bedrooms"
+                  value={formData.bedrooms}
+                  onChange={(e) => setFormData({...formData, bedrooms: parseInt(e.target.value)})}
+                  className="px-4 py-2 border rounded-lg"
+                />
+                <input
+                  type="number"
+                  step="0.5"
+                  placeholder="Bathrooms"
+                  value={formData.bathrooms}
+                  onChange={(e) => setFormData({...formData, bathrooms: parseFloat(e.target.value)})}
+                  className="px-4 py-2 border rounded-lg"
+                />
+                <input
+                  type="number"
+                  placeholder="Sq Ft"
+                  value={formData.square_feet}
+                  onChange={(e) => setFormData({...formData, square_feet: parseInt(e.target.value)})}
+                  required
+                  className="px-4 py-2 border rounded-lg"
+                />
               </div>
-              <p className="text-2xl font-bold text-blue-600 mb-3">${(property.price / 1000000).toFixed(2)}M</p>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>{property.beds} beds</span>
-                <span>{property.baths} baths</span>
-                <span>{property.sqft.toLocaleString()} sqft</span>
-              </div>
-              <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
-                View Details
+            )}
+
+            {!isResidential && (
+              <input
+                type="number"
+                placeholder="Square Feet"
+                value={formData.square_feet}
+                onChange={(e) => setFormData({...formData, square_feet: parseInt(e.target.value)})}
+                required
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+            )}
+
+            <input
+              type="number"
+              step="0.01"
+              placeholder={isRental ? "Monthly Rent ($)" : "Sale Price ($)"}
+              value={formData.price}
+              onChange={(e) => setFormData({...formData, price: e.target.value})}
+              required
+              className="w-full px-4 py-2 border rounded-lg"
+            />
+
+            <textarea
+              placeholder="Description"
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              rows={4}
+              className="w-full px-4 py-2 border rounded-lg"
+            />
+
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? 'Adding...' : 'Add Property'}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-3 border rounded-lg hover:bg-gray-50"
+              >
+                Cancel
               </button>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function LeadsTab() {
-  return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-6">Active Leads</h2>
-      <div className="space-y-4">
-        {[
-          { name: 'John & Mary Smith', email: 'jsmith@email.com', phone: '(239) 555-0123', interest: 'Miami Beach Condo', status: 'Hot', date: '2 days ago' },
-          { name: 'Robert Johnson', email: 'rjohnson@email.com', phone: '(239) 555-0456', interest: 'Tampa Single Family', status: 'Warm', date: '5 days ago' },
-          { name: 'Sarah Williams', email: 'swilliams@email.com', phone: '(239) 555-0789', interest: 'Naples Waterfront', status: 'Hot', date: '1 week ago' },
-          { name: 'Michael Davis', email: 'mdavis@email.com', phone: '(239) 555-0321', interest: 'Orlando Townhouse', status: 'Cold', date: '2 weeks ago' }
-        ].map((lead, index) => (
-          <div key={index} className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition">
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <p className="font-bold text-gray-900">{lead.name}</p>
-                <p className="text-sm text-gray-600">Interested in: {lead.interest}</p>
-              </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                lead.status === 'Hot' ? 'bg-red-100 text-red-700' :
-                lead.status === 'Warm' ? 'bg-yellow-100 text-yellow-700' :
-                'bg-gray-100 text-gray-700'
-              }`}>
-                {lead.status}
-              </span>
-            </div>
-            <div className="flex gap-4 text-sm text-gray-600 mb-3">
-              <div className="flex items-center gap-1">
-                <Mail className="w-4 h-4" />
-                {lead.email}
-              </div>
-              <div className="flex items-center gap-1">
-                <Phone className="w-4 h-4" />
-                {lead.phone}
-              </div>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-500">Added {lead.date}</span>
-              <div className="flex gap-2">
-                <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-200 transition">
-                  Contact
-                </button>
-                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200 transition">
-                  Schedule Tour
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SettingsTab() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Account Settings</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-            <input
-              type="text"
-              defaultValue="Tony Harvey"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input
-              type="email"
-              defaultValue="tony@example.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-            <input
-              type="tel"
-              defaultValue="(239) 555-0100"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">License Number</label>
-            <input
-              type="text"
-              defaultValue="FL-RE-123456"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
-            Save Changes
-          </button>
+          </form>
         </div>
       </div>
-
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Subscription</h2>
-        <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
-          <div>
-            <p className="font-semibold text-gray-900">Pro Plan</p>
-            <p className="text-sm text-gray-600">$199/month</p>
-          </div>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
-            Upgrade to Enterprise
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ title, value, change, icon, color }: any) {
-  const colorClasses = {
-    blue: 'bg-blue-100 text-blue-600',
-    green: 'bg-green-100 text-green-600',
-    purple: 'bg-purple-100 text-purple-600',
-    orange: 'bg-orange-100 text-orange-600'
-  }[color];
-
-  return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 rounded-lg ${colorClasses}`}>
-          {icon}
-        </div>
-        <span className="text-sm font-semibold text-green-600">{change}</span>
-      </div>
-      <h3 className="text-sm font-medium text-gray-600 mb-1">{title}</h3>
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
     </div>
   );
 }
