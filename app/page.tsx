@@ -1,219 +1,143 @@
-import Link from 'next/link'
+'use client'
 
-export default function HomePage() {
+export default function Home() {
+  const propertyCategories = [
+    { name: 'Residential - Buy', icon: '🏡', color: 'bg-blue-100 text-blue-700', link: '/search?type=residential&mode=buy' },
+    { name: 'Residential - Rent', icon: '🏠', color: 'bg-green-100 text-green-700', link: '/search?type=residential&mode=rent' },
+    { name: 'Commercial - Buy', icon: '🏢', color: 'bg-purple-100 text-purple-700', link: '/search?type=commercial&mode=buy' },
+    { name: 'Commercial - Rent', icon: '🏬', color: 'bg-orange-100 text-orange-700', link: '/search?type=commercial&mode=rent' },
+    { name: 'Industrial - Buy', icon: '🏭', color: 'bg-gray-100 text-gray-700', link: '/search?type=industrial&mode=buy' },
+    { name: 'Industrial - Rent', icon: '🏗️', color: 'bg-yellow-100 text-yellow-700', link: '/search?type=industrial&mode=rent' },
+  ]
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            AgentOS
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Real Estate Website Platform for Unlimited Agents
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Admin Dashboard */}
-          <div className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow">
-            <div className="text-center">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Admin Dashboard</h2>
-              <p className="text-gray-600 mb-6">
-                Platform management for CR AudioViz AI
-              </p>
-              <Link 
-                href="/admin"
-                className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                Access Admin
-              </Link>
-            </div>
-          </div>
-
-          {/* Agent Dashboard */}
-          <div className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow">
-            <div className="text-center">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Agent Dashboard</h2>
-              <p className="text-gray-600 mb-6">
-                Manage your real estate website
-              </p>
-              <Link 
-                href="/agent"
-                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Agent Login
-              </Link>
-            </div>
-          </div>
-
-          {/* Public Websites */}
-          <div className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow">
-            <div className="text-center">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Property Sites</h2>
-              <p className="text-gray-600 mb-6">
-                Browse agent properties
-              </p>
-              <Link 
-                href="/customer"
-                className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
-              >
-                View Properties
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-16 text-center">
-          <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Get Your Real Estate Website in Minutes
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Join hundreds of agents using AgentOS to power their online presence
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center">
+            <h1 className="text-5xl font-bold mb-6">Your Story. Our Expertise.</h1>
+            <p className="text-xl mb-8 max-w-2xl mx-auto">
+              Husband and wife team serving Naples, Fort Myers, Bonita Springs, and Lehigh Acres with integrity and local knowledge.
             </p>
-            <div className="flex justify-center gap-4">
-              <Link 
-                href="/agent"
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-              >
-                Start Free Trial
-              </Link>
-              <a 
-                href="#pricing"
-                className="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
-              >
-                View Pricing
+            <div className="flex gap-4 justify-center">
+              <a href="/search" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                Search Properties
+              </a>
+              <a href="/contact" className="bg-blue-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-400 transition">
+                Contact Us
               </a>
             </div>
           </div>
         </div>
+      </div>
 
-        <div id="pricing" className="mt-16">
-          <h3 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Simple, Transparent Pricing
-          </h3>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="bg-white rounded-lg shadow-lg p-8">
-              <h4 className="text-xl font-bold text-gray-900 mb-2">Starter</h4>
-              <div className="mb-4">
-                <span className="text-4xl font-bold">$99</span>
-                <span className="text-gray-600">/month</span>
+      {/* Property Categories */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 className="text-3xl font-bold text-center mb-12">Browse by Property Type</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {propertyCategories.map((category) => (
+            <a 
+              key={category.name}
+              href={category.link}
+              className={`${category.color} p-6 rounded-lg shadow-md hover:shadow-xl transition cursor-pointer`}
+            >
+              <div className="text-4xl mb-4">{category.icon}</div>
+              <h3 className="text-xl font-bold">{category.name}</h3>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* Agent Profiles */}
+      <div className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-12">Meet Your Agents</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Tony Harvey */}
+            <div className="bg-white rounded-lg shadow-md p-8">
+              <div className="w-32 h-32 bg-blue-200 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl">
+                👨‍💼
               </div>
-              <ul className="space-y-2 mb-6">
-                <li className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Up to 50 properties
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Custom domain
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Lead management
-                </li>
-              </ul>
-              <Link 
-                href="/agent"
-                className="block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Start Trial
-              </Link>
+              <h3 className="text-2xl font-bold text-center mb-2">Tony Harvey</h3>
+              <p className="text-gray-600 text-center mb-4">Real Estate Professional</p>
+              <div className="text-gray-700 space-y-2">
+                <p>✓ Graduated from Heidelberg University, Tiffin, Ohio</p>
+                <p>✓ Extensive mortgage industry background</p>
+                <p>✓ Strong negotiation skills</p>
+                <p>✓ Specializing in buyer and seller representation</p>
+              </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-lg p-8 border-2 border-blue-600">
-              <div className="bg-blue-600 text-white text-sm font-bold px-4 py-1 rounded-full inline-block mb-2">
-                MOST POPULAR
+            {/* Laura Harvey */}
+            <div className="bg-white rounded-lg shadow-md p-8">
+              <div className="w-32 h-32 bg-purple-200 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl">
+                👩‍💼
               </div>
-              <h4 className="text-xl font-bold text-gray-900 mb-2">Pro</h4>
-              <div className="mb-4">
-                <span className="text-4xl font-bold">$199</span>
-                <span className="text-gray-600">/month</span>
+              <h3 className="text-2xl font-bold text-center mb-2">Laura Harvey</h3>
+              <p className="text-gray-600 text-center mb-4">Real Estate Professional</p>
+              <div className="text-gray-700 space-y-2">
+                <p>✓ Born and raised in Naples, Florida</p>
+                <p>✓ Naples High School Class of 2001</p>
+                <p>✓ Deep local Collier County expertise</p>
+                <p>✓ Community connections throughout Southwest Florida</p>
               </div>
-              <ul className="space-y-2 mb-6">
-                <li className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Unlimited properties
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Priority support
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  AI chatbot
-                </li>
-              </ul>
-              <Link 
-                href="/agent"
-                className="block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Start Trial
-              </Link>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-lg p-8">
-              <h4 className="text-xl font-bold text-gray-900 mb-2">Enterprise</h4>
-              <div className="mb-4">
-                <span className="text-4xl font-bold">$399</span>
-                <span className="text-gray-600">/month</span>
-              </div>
-              <ul className="space-y-2 mb-6">
-                <li className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Everything in Pro
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  White label
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  API access
-                </li>
-              </ul>
-              <Link 
-                href="/agent"
-                className="block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Contact Sales
-              </Link>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Our Story */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="bg-white rounded-lg shadow-md p-8">
+          <h2 className="text-3xl font-bold text-center mb-6">Our Story</h2>
+          <div className="max-w-3xl mx-auto text-gray-700 space-y-4">
+            <p className="text-lg">
+              Tony and Laura met in April 2007 in Key West, Florida, where their shared passion for helping people 
+              and building lasting relationships first brought them together.
+            </p>
+            <p className="text-lg">
+              After getting engaged in 2012 and marrying in Naples in 2013, they combined their unique strengths - 
+              Tony's mortgage industry expertise and Laura's deep local knowledge - to create a real estate partnership 
+              that truly puts clients first.
+            </p>
+            <p className="text-lg">
+              Today, they serve families throughout Naples, Fort Myers, Bonita Springs, and Lehigh Acres, bringing 
+              both professional excellence and personal care to every transaction.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Service Areas */}
+      <div className="bg-blue-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-8">Our Service Areas</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="bg-white p-6 rounded-lg shadow">
+              <p className="text-xl font-semibold">Naples</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <p className="text-xl font-semibold">Fort Myers</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <p className="text-xl font-semibold">Bonita Springs</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <p className="text-xl font-semibold">Lehigh Acres</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Find Your Dream Home?</h2>
+          <p className="text-xl mb-8">Let's start your real estate journey together.</p>
+          <a href="/contact" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
+            Get in Touch
+          </a>
         </div>
       </div>
     </div>
